@@ -97,7 +97,7 @@ const Quiz = ({questions}) => {
     setMarkedForReview(markedQuestions);
   };
   return (
-    <div className="h-screen">
+    <div className="min-h-screen">
       {!quizStart ? (
         <div className="flex flex-col justify-center items-center py-10 px-4">
           <h2 className="font-bold text-2xl mb-4">Welcome to the Quiz</h2>
@@ -127,7 +127,7 @@ const Quiz = ({questions}) => {
       ) : (
         <div className="container mx-auto lg:px-20 w-full">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Quiz</h1>
+            <h1 className="text-2xl font-bold mb-4 text-violet-600">{topic.toLocaleUpperCase()}</h1>
           </div>
           <div className="">
             {isQuizFinished ? (
