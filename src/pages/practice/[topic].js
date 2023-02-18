@@ -95,7 +95,6 @@ const Quiz = () => {
     }
     setMarkedForReview(markedQuestions);
   };
-  console.log(data);
   if (error)
     return (
       <div className="min-h min-h-screen flex justify-center items-center">
@@ -173,7 +172,7 @@ const Quiz = () => {
                   Main Section
                 </Link>
               </div>
-              <Solutions data={data} />
+              <Solutions data={quizQuestions} />
             </div>
           ) : (
             <div className="flex flex-col lg:flex-row">
