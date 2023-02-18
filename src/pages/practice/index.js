@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import useSWR from 'swr'
-import Skeleton from 'react-loading-skeleton';
+import useSWR from 'swr';
 
 function Practice() {
-  const {data,error} = useSWR(`/api/getSubject`,fetcher)
-  
+  const { data, error } = useSWR(`/api/getSubject`, fetcher);
+
   const [allData, setAllData] = useState([]);
   const [selected, setSelected] = useState('Reasoning');
 
@@ -13,19 +12,51 @@ function Practice() {
     if (data) {
       setAllData(data);
     }
+    const storedValue = localStorage.getItem('selected');
+    if (storedValue) {
+      setSelected(storedValue);
+    }
   }, [data]);
-  if (error) return <div className='min-h min-h-screen flex justify-center items-center'>Error fetching data</div>;
-  if (!data) return <Skeleton count={10} />;
+  if (error)
+    return (
+      <div className="min-h min-h-screen flex justify-center items-center">
+        Error fetching data
+      </div>
+    );
+  if (!data)
+    return (
+      <div class="flex items-center justify-center w-full h-screen">
+        <div class="flex justify-center items-center space-x-1 text-sm text-gray-700">
+          <svg
+            fill="none"
+            class="w-6 h-6 animate-spin"
+            viewBox="0 0 32 32"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z"
+              fill="currentColor"
+              fill-rule="evenodd"
+            />
+          </svg>
+
+          <div>Loading ...</div>
+        </div>
+      </div>
+    );
   return (
-    <div className='bg-white min-h-screen'>
+    <div className="bg-white min-h-screen">
       <div className="p-10">
         <div className="bg-violet-500 text-white p-4 rounded-md">
           <ul className="flex justify-around">
             {allData?.map((sub) => (
-              <li className='m-2 cursor-pointer'
+              <li
+                className="m-2 cursor-pointer"
                 key={sub.name}
                 onClick={() => {
                   setSelected(sub?.name);
+                  localStorage.setItem('selected', sub?.name);
                 }}
               >
                 {sub.name}
@@ -48,9 +79,7 @@ function Practice() {
                           {sub.topics.map((category, index) => {
                             return (
                               <Link
-                                href={`/practice/${category
-                                  .toLowerCase()
-                                  }`}
+                                href={`/practice/${category.toLowerCase()}`}
                                 key={index}
                                 className="text-lg font-medium text-gray-800 hover:text-violet-600"
                               >
@@ -75,18 +104,18 @@ function Practice() {
 export default Practice;
 export async function getServerSideProps(context) {
   const baseUrl = process.env.BASE_URL;
-  const res = await fetch(`${baseUrl}/api/getSubject`)
-  const data = await res.json()
+  const res = await fetch(`${baseUrl}/api/getSubject`);
+  const data = await res.json();
 
   if (!data) {
     return {
       notFound: true,
-    }
+    };
   }
 
   return {
     props: { data },
-  }
+  };
 }
 
 async function fetcher(url) {
