@@ -1,39 +1,35 @@
 import Link from 'next/link';
-import { Router, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
-
-const Quiz = ({questions}) => {
+import useSWR from 'swr';
+import Skeleton from 'react-loading-skeleton';
+import Solutions from '@/components/Solutions';
+const Quiz = () => {
   const router = useRouter();
   const { topic } = router.query;
-  const [quizQuestions, setQuizQuestions] = useState(questions);
-  const [totalQuestions, setTotalQuestions] = useState(10);
 
-  // useEffect(() => {
-  //   async function getData() {
-  //     const response = await fetch(`/api/getQuestions/${topic}`);
-  //     if (response.status === 404) {
-  //       toast('Question Coming Soon', { position: 'bottom-center' });
-  //     }
-  //     const data = await response.json();
-  //     if (data.status === true) {
-  //       setQuizQuestions(data.questions);
-  //     }
-  //   }
-  //   getData();
-  // }, []);
+  const {data,error} = useSWR(`/api/getQuestions/${topic}`,fetcher)
 
+  
+  const [quizQuestions, setQuizQuestions] = useState([]);
   const [quizStart, setQuizStart] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [score, setScore] = useState(0);
-  const [minutes, setMinutes] = useState(10);
+  const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
   const [solved, setSolved] = useState([]);
   const [markedForReview, setMarkedForReview] = useState([]);
   const [timer, setTimer] = useState();
-  console.log(quizQuestions);
+
+  useEffect(() => {
+    if (data) {
+      setQuizQuestions(data);
+    }
+  }, [data]);
+  
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -83,7 +79,11 @@ const Quiz = ({questions}) => {
   };
 
   const handleSubmit = () => {
+    if (selectedOption === quizQuestions[currentQuestion].answer) {
+      setScore(score + 1);
+    }
     setIsQuizFinished(true);
+
   };
 
   const handleMarkForReview = () => {
@@ -96,6 +96,9 @@ const Quiz = ({questions}) => {
     }
     setMarkedForReview(markedQuestions);
   };
+console.log(data)
+  if(error) return <div className='min-h min-h-screen flex justify-center items-center'>Error fetching data</div>
+if(!data) return <Skeleton count={10} />
   return (
     <div className="min-h-screen">
       {!quizStart ? (
@@ -106,7 +109,8 @@ const Quiz = ({questions}) => {
                 className="bg-violet-400 w-72 px-4 py-2 mb-5 rounded-lg hover:bg-violet-500"
                 onClick={() => {
                   setQuizStart(true);
-                  setTotalQuestions(10);
+                  setMinutes(10)
+                  setSeconds(0)
                   setTimer(true)
                 }}
               >
@@ -116,7 +120,6 @@ const Quiz = ({questions}) => {
                 className="bg-violet-400 w-72 px-4 py-2 mb-5 rounded-lg hover:bg-violet-500"
                 onClick={() => {
                   setQuizStart(true);
-                  setTotalQuestions(10);
                   setTimer(false)
                 }}
               >
@@ -129,8 +132,8 @@ const Quiz = ({questions}) => {
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4 text-violet-600">{topic.toLocaleUpperCase()}</h1>
           </div>
-          <div className="">
             {isQuizFinished ? (
+              <div>
               <div className="flex flex-col text-center items-center">
                 <h2 className="text-xl font-bold mb-4">Quiz Completed</h2>
                 <p className="mb-4">
@@ -142,6 +145,8 @@ const Quiz = ({questions}) => {
                 >
                   Main Section
                 </Link>
+              </div>
+              <Solutions data={data}/>
               </div>
             ) : (
               <div className="flex flex-col lg:flex-row">
@@ -272,7 +277,6 @@ const Quiz = ({questions}) => {
               </div>
             )}
           </div>
-        </div>
       )}
       <ToastContainer />
     </div>
@@ -282,21 +286,8 @@ const Quiz = ({questions}) => {
 
 export default Quiz;
 
-export async function getServerSideProps(context) {
-  const baseUrl = process.env.BASE_URL;
-  const {topic} = context.query
-  const res = await fetch(`${baseUrl}/api/getQuestions/${topic}`)
-  const data = await res.json()
-  const questions = data.questions
-  console.log(questions)
-
-  if (!questions) {
-    return {
-      notFound: true,
-    }
-  }
-
-  return {
-    props: { questions },
-  }
+async function fetcher(url) {
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.questions;
 }

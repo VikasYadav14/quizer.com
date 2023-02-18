@@ -1,23 +1,21 @@
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import useSWR from 'swr'
+import Skeleton from 'react-loading-skeleton';
 
-function Practice({data}) {
-  const [allData, setAllData] = useState(data);
+function Practice() {
+  const {data,error} = useSWR(`/api/getSubject`,fetcher)
+  
+  const [allData, setAllData] = useState([]);
   const [selected, setSelected] = useState('Reasoning');
-  const [isLoading, setIsLoading] = useState(false);
-  // useEffect(() => {
-  //   setIsLoading(true);
-  //   fetch(`/api/getSubject`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setAllData(data);
-  //       setIsLoading(false);
-  //     });
-  // }, []);
-  const router = useRouter();
 
-  if (router.isFallback) {return <div className='min-h min-h-screen flex justify-center items-center'><p>Loading...</p></div>;}
+  useEffect(() => {
+    if (data) {
+      setAllData(data);
+    }
+  }, [data]);
+  if (error) return <div className='min-h min-h-screen flex justify-center items-center'>Error fetching data</div>;
+  if (!data) return <Skeleton count={10} />;
   return (
     <div className='bg-white min-h-screen'>
       <div className="p-10">
@@ -89,4 +87,10 @@ export async function getServerSideProps(context) {
   return {
     props: { data },
   }
+}
+
+async function fetcher(url) {
+  const res = await fetch(url);
+  const data = await res.json();
+  return data;
 }
