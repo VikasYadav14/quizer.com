@@ -23,28 +23,10 @@ function Practice() {
         Error fetching data
       </div>
     );
-  if (!data)
-    return (
-      <div className="flex items-center justify-center w-full h-screen">
-        <div className="flex justify-center items-center space-x-1 text-sm text-gray-700">
-          <svg
-            fill="none"
-            className="w-6 h-6 animate-spin"
-            viewBox="0 0 32 32"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              clipRule="evenodd"
-              d="M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z"
-              fill="currentColor"
-              fillRule="evenodd"
-            />
-          </svg>
-
-          <div>Loading ...</div>
-        </div>
-      </div>
-    );
+  // if (!data)
+  //   return (
+      
+  //   );
   return (
     <div className="bg-white min-h-screen">
       <div className="p-10">
@@ -67,6 +49,25 @@ function Practice() {
         <div>
           <div className="w-full h-auto lg:px-20">
             <div className="p-4">
+              {!data && <div className="flex items-center justify-center w-full h-screen">
+        <div className="flex justify-center items-center space-x-1 text-sm text-gray-700">
+          <svg
+            fill="none"
+            className="w-6 h-6 animate-spin"
+            viewBox="0 0 32 32"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clipRule="evenodd"
+              d="M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z"
+              fill="currentColor"
+              fillRule="evenodd"
+            />
+          </svg>
+
+          <div>Loading ...</div>
+        </div>
+      </div>}
               {allData?.map((sub) => {
                 if (sub.name === selected) {
                   return (
@@ -102,21 +103,6 @@ function Practice() {
 }
 
 export default Practice;
-export async function getServerSideProps(context) {
-  const baseUrl = process.env.BASE_URL;
-  const res = await fetch(`${baseUrl}/api/getSubject`);
-  const data = await res.json();
-
-  if (!data) {
-    return {
-      notFound: true,
-    };
-  }
-
-  return {
-    props: { data },
-  };
-}
 
 async function fetcher(url) {
   const res = await fetch(url);
